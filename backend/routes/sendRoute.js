@@ -1,7 +1,16 @@
 const express = require("express");
 const multer = require("multer");
 const sendMail = require("../utils/sendMail");
-const generateEmail = require("../utils/generateEmail");
+
+// Lazy load generateEmail to avoid OpenAI initialization errors at startup
+let generateEmail;
+
+const getGenerateEmail = () => {
+  if (!generateEmail) {
+    generateEmail = require("../utils/generateEmail");
+  }
+  return generateEmail;
+};
 
 const router = express.Router();
 
@@ -9,8 +18,17 @@ const upload = multer({ dest: "uploads/" });
 
 router.post("/", upload.single("resume"), async (req, res) => {
   try {
-    const { companies } = req.body;
+    let companies = req.body.companies;
     const resumePath = req.file ? req.file.path : null;
+
+    // companies is sent as a JSON string via FormData — parse it
+    if (typeof companies === "string") {
+      try {
+        companies = JSON.parse(companies);
+      } catch (e) {
+        return res.status(400).json({ error: "Invalid companies JSON" });
+      }
+    }
 
     if (!companies || !Array.isArray(companies) || companies.length === 0) {
       return res.status(400).json({ error: "Companies array is required" });
@@ -30,7 +48,7 @@ router.post("/", upload.single("resume"), async (req, res) => {
         }
 
         // Generate personalized email
-        const emailBody = await generateEmail(
+        const emailBody = await getGenerateEmail()(
           company.company,
           company.role || "Internship/Full-Time Role",
           company.contact_name || "Hiring Manager"
