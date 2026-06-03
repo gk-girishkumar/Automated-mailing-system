@@ -349,6 +349,27 @@ vercel
 
 Choose `Other` for the framework preset and use `npm install` as the build command.
 
+### Android App (Capacitor)
+
+1. **Build the Web Project**
+   ```bash
+   cd frontend
+   npm run build
+   npx cap sync android
+   ```
+
+2. **Open in Android Studio**
+   - Open Android Studio and select **Open**.
+   - Navigate to and select the `frontend/android` folder.
+   - Wait for the Gradle project to sync.
+
+3. **Generate Signed Bundle / APK**
+   - From the top menu bar, click **Build > Generate Signed Bundle / APK...**
+   - Select **Android App Bundle** and click **Next**.
+   - Under **Key store path**, click **Create new...**
+   - Fill out the form (password, alias, your name). **Keep this Keystore file safe!** You need it to publish future updates to your app.
+   - Click **Next**, select **release**, and click **Finish**.
+
 ---
 
 ## 📝 Build Timeline
