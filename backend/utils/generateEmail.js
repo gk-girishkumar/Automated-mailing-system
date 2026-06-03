@@ -29,7 +29,7 @@ Girish Kumar
 gky.girishkumar@gmail.com`;
 }
 
-async function generateEmail(company, role, recipientName = "Hiring Manager") {
+async function generateEmail(company, role, recipientName = "Hiring Manager", customPrompt = "") {
   const client = initializeOpenAI();
 
   // Try OpenAI first if key is available
@@ -49,6 +49,7 @@ Company: ${company}
 Role: ${role}
 Recipient: ${recipientName}
 
+${customPrompt ? `Additional Instructions from User:\n${customPrompt}\n` : ''}
 Requirements:
 - Keep it professional and concise (3-4 paragraphs)
 - Personalize it based on the company and role
@@ -56,6 +57,7 @@ Requirements:
 - Mention relevant skills
 - Include a call to action
 - Keep it under 200 words
+${customPrompt ? "- Follow the additional instructions provided by the user above." : ""}
 `;
 
     try {

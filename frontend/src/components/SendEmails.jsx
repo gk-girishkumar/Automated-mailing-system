@@ -1,6 +1,8 @@
 import axios from "axios";
 import { useState } from "react";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 export default function SendEmails() {
   const [resume, setResume] = useState(null);
   const [companies, setCompanies] = useState([
@@ -12,6 +14,7 @@ export default function SendEmails() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [customPrompt, setCustomPrompt] = useState("");
 
   const handleCompanyChange = (index, field, value) => {
     const newCompanies = [...companies];
@@ -88,16 +91,28 @@ export default function SendEmails() {
       return;
     }
 
+    // Get credentials from localStorage
+    const emailUser = localStorage.getItem("emailUser");
+    const emailPass = localStorage.getItem("emailPass");
+
+    if (!emailUser || !emailPass) {
+      setError("Please log in with your email credentials first");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("resume", resume);
     formData.append("companies", JSON.stringify(validCompanies));
+    formData.append("emailUser", emailUser);
+    formData.append("emailPass", emailPass);
+    formData.append("customPrompt", customPrompt);
 
     setLoading(true);
     setError(null);
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/send",
+        `${API_URL}/api/send`,
         formData,
         {
           headers: {
@@ -127,6 +142,16 @@ export default function SendEmails() {
           accept=".pdf"
           onChange={(e) => setResume(e.target.files[0])}
           className="block w-full p-2 border border-gray-300 rounded"
+        />
+      </div>
+
+      <div className="mb-4">
+        <label className="block mb-2 font-semibold">Custom AI Prompt (Optional)</label>
+        <textarea
+          placeholder="E.g., Emphasize my frontend skills and keep it very casual..."
+          value={customPrompt}
+          onChange={(e) => setCustomPrompt(e.target.value)}
+          className="block w-full p-2 border border-gray-300 rounded h-24"
         />
       </div>
 

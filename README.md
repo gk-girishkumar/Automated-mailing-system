@@ -330,21 +330,24 @@ Built an AI-powered full-stack web application that automates personalized cold 
 
 ## 🚀 Deployment
 
-### Frontend (Vercel)
+### Frontend (Netlify)
 ```bash
 cd frontend
+npm install
+npm run build
+netlify deploy --prod --dir=dist
+```
+
+Set `VITE_API_URL` in Netlify site settings to your Vercel backend URL.
+
+### Backend (Vercel)
+```bash
+cd backend
 npm install
 vercel
 ```
 
-### Backend (Render/Railway)
-```bash
-# Push to GitHub
-git push origin main
-
-# On Render/Railway
-# Connect your repo and deploy
-```
+Choose `Other` for the framework preset and use `npm install` as the build command.
 
 ---
 

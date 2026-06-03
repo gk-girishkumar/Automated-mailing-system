@@ -1,91 +1,82 @@
 # 🚀 Deployment Guide
 
-## Frontend Deployment (Vercel)
+## Frontend Deployment (Netlify)
 
 ### Step 1: Prepare Frontend
 
 ```bash
 cd frontend
+npm install
 npm run build
 ```
 
-Verify `dist/` folder is created.
+Verify the `dist/` folder is created.
 
-### Step 2: Deploy to Vercel
+### Step 2: Deploy to Netlify
 
 ```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy from frontend directory
-vercel
+npm i -g netlify-cli
+cd frontend
+netlify deploy --prod --dir=dist
 ```
 
-Follow the prompts:
-- Project name: `ai-cold-mail-frontend`
-- Framework: `React`
-- Build command: `npm run build`
-- Output directory: `dist`
+Follow the prompts and connect the `frontend` folder as the site root.
 
-### Step 3: Update API URL
+### Step 3: Configure the Frontend API URL
 
-After deployment, update frontend to use production backend URL:
+In Netlify site settings, set an environment variable:
 
-Edit `frontend/src/App.jsx` or create a config file:
+- `VITE_API_URL` = `https://<your-vercel-backend>.vercel.app`
 
-```javascript
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000"
-```
+This allows the deployed frontend to call the Vercel backend.
 
 ---
 
-## Backend Deployment (Render)
+## Backend Deployment (Vercel)
 
 ### Step 1: Prepare Backend
 
 ```bash
 cd backend
-# Ensure all dependencies are in package.json
 npm install
 ```
 
-### Step 2: Create Render Account
+### Step 2: Deploy to Vercel
 
-Go to [render.com](https://render.com) and sign up.
-
-### Step 3: Push to GitHub
+Install the Vercel CLI if needed:
 
 ```bash
-cd ../
-git add .
-git commit -m "Initial commit: AI Cold Mail Agent"
-git push origin main
+npm i -g vercel
 ```
 
-### Step 4: Connect to Render
+From the `backend` directory, run:
 
-1. New → Web Service
-2. Connect GitHub repo
-3. Name: `ai-cold-mail-backend`
-4. Environment: Node
-5. Build command: `cd backend && npm install`
-6. Start command: `node backend/server.js`
-
-### Step 5: Set Environment Variables
-
-In Render dashboard → Environment:
-
-```
-PORT=10000
-EMAIL_USER=your-email@gmail.com
-EMAIL_PASS=your_app_password
-OPENAI_API_KEY=sk-xxxxx
-DATABASE_URL=postgresql://...
+```bash
+vercel
 ```
 
-### Step 6: Deploy
+Choose:
+- Project name: `ai-cold-mail-backend`
+- Framework preset: `Other`
+- Build command: `npm install`
+- Output directory: `.`
 
-Click "Deploy" - wait 2-3 minutes.
+Vercel will use `backend/vercel.json` to route requests to `server.js`.
+
+### Step 3: Set Environment Variables
+
+In the Vercel dashboard for your backend project, add:
+
+- `EMAIL_USER`
+- `EMAIL_PASS`
+- `OPENAI_API_KEY`
+- `DATABASE_URL`
+
+You can also add `PORT` if needed, but Vercel sets the port automatically.
+
+### Step 4: Deploy
+
+Click deploy or run `vercel --prod`.
 
 ---
 
@@ -119,24 +110,24 @@ psql "your_neon_connection_string" < database/schema.sql
 
 ## Updating Deployed Apps
 
-### Frontend Update (Vercel)
+### Frontend Update (Netlify)
 
 ```bash
 cd frontend
 git add .
-git commit -m "Update features"
+git commit -m "Update frontend"
 git push origin main
-# Vercel auto-deploys
+# Netlify auto-deploys if connected to Git
 ```
 
-### Backend Update (Render)
+### Backend Update (Vercel)
 
 ```bash
 cd backend
 git add .
-git commit -m "Update API"
+git commit -m "Update backend"
 git push origin main
-# Render auto-deploys
+# Vercel auto-deploys if connected to Git
 ```
 
 ---
@@ -158,11 +149,11 @@ git push origin main
 
 ## Monitoring
 
-### Backend Logs (Render)
+### Backend Logs (Vercel)
 - Dashboard → Logs
 - Monitor errors and requests
 
-### Frontend Performance (Vercel)
+### Frontend Performance (Netlify)
 - Dashboard → Analytics
 - Check performance metrics
 
@@ -177,7 +168,7 @@ git push origin main
 | Service | Free Tier |
 |---------|-----------|
 | Vercel | ∞ requests |
-| Render | 750 hours/month |
+| Netlify | Free tier with build minutes |
 | Neon | 3GB storage |
 | OpenAI | Pay-as-you-go |
 | Gmail | Free |
@@ -203,7 +194,7 @@ git push origin main
 2. Add custom domain
 3. Update DNS records
 
-### Render
+### Vercel
 1. Settings → Custom Domain
 2. Add domain
 3. Update CNAME record
@@ -246,7 +237,7 @@ const analytics = require("segment");
 
 ## Auto-Scaling
 
-Render automatically scales based on load. No configuration needed!
+Vercel automatically scales based on traffic when your project is connected to Git. No extra server configuration is needed!
 
 ---
 

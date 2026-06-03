@@ -2,13 +2,17 @@ const express = require("express");
 const multer = require("multer");
 const csv = require("csv-parser");
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
+
+const uploadDir = path.join(os.tmpdir(), "uploads");
+fs.mkdirSync(uploadDir, { recursive: true });
 
 const router = express.Router();
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/");
+    cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));

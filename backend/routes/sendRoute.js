@@ -1,6 +1,12 @@
 const express = require("express");
 const multer = require("multer");
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
 const sendMail = require("../utils/sendMail");
+
+const uploadDir = path.join(os.tmpdir(), "uploads");
+fs.mkdirSync(uploadDir, { recursive: true });
 
 // Lazy load generateEmail to avoid OpenAI initialization errors at startup
 let generateEmail;
@@ -14,12 +20,16 @@ const getGenerateEmail = () => {
 
 const router = express.Router();
 
-const upload = multer({ dest: "uploads/" });
+const upload = multer({ dest: uploadDir });
 
 router.post("/", upload.single("resume"), async (req, res) => {
+  let resumePath = req.file ? req.file.path : null;
+
   try {
     let companies = req.body.companies;
-    const resumePath = req.file ? req.file.path : null;
+    const emailUser = req.body.emailUser;
+    const emailPass = req.body.emailPass;
+    const customPrompt = req.body.customPrompt || "";
 
     // companies is sent as a JSON string via FormData — parse it
     if (typeof companies === "string") {
@@ -32,6 +42,10 @@ router.post("/", upload.single("resume"), async (req, res) => {
 
     if (!companies || !Array.isArray(companies) || companies.length === 0) {
       return res.status(400).json({ error: "Companies array is required" });
+    }
+
+    if (!emailUser || !emailPass) {
+      return res.status(400).json({ error: "Email credentials are required" });
     }
 
     const results = [];
@@ -51,7 +65,8 @@ router.post("/", upload.single("resume"), async (req, res) => {
         const emailBody = await getGenerateEmail()(
           company.company,
           company.role || "Internship/Full-Time Role",
-          company.contact_name || "Hiring Manager"
+          company.contact_name || "Hiring Manager",
+          customPrompt
         );
 
         // Send email
@@ -60,6 +75,8 @@ router.post("/", upload.single("resume"), async (req, res) => {
           subject: `Application for ${company.role || "Opportunity"}`,
           text: emailBody,
           attachmentPath: resumePath,
+          emailUser,
+          emailPass,
         });
 
         results.push({
@@ -89,6 +106,14 @@ router.post("/", upload.single("resume"), async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
+  } finally {
+    if (resumePath) {
+      fs.unlink(resumePath, (unlinkError) => {
+        if (unlinkError) {
+          console.warn("Failed to delete temporary resume:", unlinkError.message);
+        }
+      });
+    }
   }
 });
 

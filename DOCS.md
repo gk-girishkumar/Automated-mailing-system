@@ -116,17 +116,20 @@ psql cold_mail_agent < database/schema.sql
 
 ## 🚀 Quick Deploy
 
-### Frontend on Vercel
+### Frontend on Netlify
 ```bash
 cd frontend
 npm install
-vercel
+npm run build
+netlify deploy --prod --dir=dist
 ```
 
-### Backend on Render
+Set `VITE_API_URL` to your Vercel backend URL in Netlify site environment variables.
+
+### Backend on Vercel
 1. Push code to GitHub
-2. Connect repo to Render
-3. Set environment variables
+2. Connect repo to Vercel
+3. Add `EMAIL_USER`, `EMAIL_PASS`, `OPENAI_API_KEY`, `DATABASE_URL`
 4. Deploy
 
 ---
